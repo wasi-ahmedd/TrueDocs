@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Plus } from "lucide-react";
+import { Plus, FileBadge } from "lucide-react";
+import { CARD_CONFIG } from "@/lib/card-config";
 
 interface AddCardDialogProps {
   personId: number;
@@ -24,21 +25,31 @@ interface AddCardDialogProps {
 export function AddCardDialog({ personId }: AddCardDialogProps) {
   const [open, setOpen] = useState(false);
   const createCard = useCreateCard();
-  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const form = useForm<InsertCard>({
-    resolver: zodResolver(insertCardSchema),
+    resolver: zodResolver(insertCardSchema.omit({ filename: true })), // Omit filename validation since handle it manually
     defaultValues: {
       personId,
       type: "aadhaar",
-      filename: "",
+      // filename is optional in form, handled via state
+      filename: "placeholder",
     },
   });
 
   const onSubmit = (data: InsertCard) => {
-    createCard.mutate(data, {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("personId", data.personId.toString());
+    formData.append("type", data.type);
+    formData.append("file", selectedFile);
+
+    createCard.mutate(formData as any, {
       onSuccess: () => {
         setOpen(false);
-        form.reset({ personId, type: "aadhaar", filename: "" });
+        form.reset({ personId, type: "aadhaar", filename: "placeholder" });
+        setSelectedFile(null);
       },
     });
   };
@@ -55,7 +66,7 @@ export function AddCardDialog({ personId }: AddCardDialogProps) {
           <DialogTitle>Add New Card</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
             <FormField
               control={form.control}
               name="type"
@@ -64,43 +75,64 @@ export function AddCardDialog({ personId }: AddCardDialogProps) {
                   <FormLabel>Card Type</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-auto p-3">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {CARD_TYPES.map(type => (
-                        <SelectItem key={type} value={type} className="capitalize">
-                          {type}
-                        </SelectItem>
-                      ))}
+                      {CARD_TYPES.map(type => {
+                        const config = CARD_CONFIG[type] || { icon: FileBadge, label: type, desc: "", color: "text-primary" };
+                        const Icon = config.icon;
+                        return (
+                          <SelectItem key={type} value={type} className="cursor-pointer py-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${config.color}`}>
+                                <Icon className="h-5 w-5" />
+                              </div>
+                              <div className="flex flex-col text-left">
+                                <span className="font-semibold">{config.label}</span>
+                                <span className="text-xs text-muted-foreground">{config.desc}</span>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={form.control}
-              name="filename"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>PDF Filename</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. document.pdf" {...field} />
-                  </FormControl>
-                  <p className="text-xs text-muted-foreground">
-                    Ensure this file exists in the /pdfs directory
-                  </p>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={createCard.isPending}>
-                {createCard.isPending ? "Adding..." : "Add Card"}
+
+            <FormItem>
+              <FormLabel>Upload File</FormLabel>
+              <div className="border-2 border-dashed rounded-lg p-6 hover:bg-accent/5 transition-colors text-center cursor-pointer relative">
+                <input
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  accept=".pdf,image/*"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  {selectedFile ? (
+                    <div className="text-primary font-medium flex items-center gap-2">
+                      <FileBadge className="w-4 h-4" />
+                      {selectedFile.name}
+                    </div>
+                  ) : (
+                    <>
+                      <Plus className="w-8 h-8 opacity-50" />
+                      <span className="text-sm">Click to browse or drag file here</span>
+                      <span className="text-xs opacity-50">(PDF or Images)</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </FormItem>
+
+            <div className="flex justify-end pt-2">
+              <Button type="submit" disabled={createCard.isPending || !selectedFile} className="w-full">
+                {createCard.isPending ? "Encrypting & Uploading..." : "Securely Add Card"}
               </Button>
             </div>
           </form>

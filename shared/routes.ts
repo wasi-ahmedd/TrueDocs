@@ -47,6 +47,16 @@ export const api = {
         200: z.custom<typeof people.$inferSelect & { cards: typeof cards.$inferSelect[] }>(),
         404: errorSchemas.notFound,
       },
+    },
+    update: {
+      method: 'PATCH' as const,
+      path: '/api/people/:id',
+      input: insertPersonSchema,
+      responses: {
+        200: z.custom<typeof people.$inferSelect>(),
+        404: errorSchemas.notFound,
+        400: errorSchemas.validation,
+      },
     }
   },
   cards: {
@@ -89,4 +99,4 @@ export function buildUrl(path: string, params?: Record<string, string | number>)
   return url;
 }
 
-export const CARD_TYPES = ["aadhaar", "pan", "voterid", "ration"];
+export const CARD_TYPES = ["aadhaar", "pan", "voterid", "ration", "marks"];

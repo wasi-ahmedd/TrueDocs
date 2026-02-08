@@ -11,60 +11,107 @@
   /* Clean, stark, high-contrast palette */
   --background: 0 0% 98%;
   --foreground: 222 47% 11%;
-  
+
   --primary: 221 83% 53%;
   --primary-foreground: 210 40% 98%;
-  
+
   --secondary: 210 40% 96%;
   --secondary-foreground: 222 47% 11%;
-  
+
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
-  
+
   --accent: 262 83% 58%;
   --accent-foreground: 210 40% 98%;
-  
+
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
   --border: 214 32% 91%;
   --input: 214 32% 91%;
   --ring: 221 83% 53%;
-  
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
   --radius: 0.75rem;
 }
 
+/* Dark Theme (Default Dark) */
 .dark {
   --background: 222 47% 11%;
   --foreground: 210 40% 98%;
-  
   --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
-  
   --secondary: 217 19% 27%;
   --secondary-foreground: 210 40% 98%;
-  
   --muted: 217 19% 27%;
   --muted-foreground: 215 20.2% 65.1%;
-  
   --accent: 262 83% 65%;
   --accent-foreground: 210 40% 98%;
-  
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
-  
   --border: 217 19% 27%;
   --input: 217 19% 27%;
   --ring: 224 76% 48%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+}
+
+/* Navy Theme */
+.theme-navy {
+  --background: 225 50% 10%;
+  --foreground: 220 20% 95%;
+  --primary: 190 90% 50%;
+  --primary-foreground: 225 50% 10%;
+  --secondary: 225 40% 20%;
+  --secondary-foreground: 220 20% 95%;
+  --muted: 225 40% 20%;
+  --muted-foreground: 220 15% 70%;
+  --accent: 45 90% 60%;
+  --accent-foreground: 225 50% 10%;
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 225 40% 25%;
+  --input: 225 40% 25%;
+  --ring: 190 90% 50%;
+  --popover: 225 50% 15%;
+  --popover-foreground: 220 20% 95%;
+}
+
+/* Cosmic Theme */
+.theme-cosmic {
+  --background: 260 50% 8%;
+  --foreground: 280 20% 95%;
+  --primary: 290 90% 60%;
+  --primary-foreground: 260 50% 8%;
+  --secondary: 260 40% 18%;
+  --secondary-foreground: 280 20% 95%;
+  --muted: 260 40% 18%;
+  --muted-foreground: 280 15% 70%;
+  --accent: 170 80% 60%;
+  --accent-foreground: 260 50% 8%;
+  --destructive: 0 80% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 260 40% 25%;
+  --input: 260 40% 25%;
+  --ring: 290 100% 60%;
+  --popover: 260 50% 12%;
+  --popover-foreground: 280 20% 95%;
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-500 ease-in-out;
     font-family: var(--font-sans);
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     @apply tracking-tight font-bold;
   }
@@ -74,7 +121,7 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   /* Smooth glassmorphism utility */
   .glass-panel {
     @apply bg-white/80 dark:bg-black/50 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg;

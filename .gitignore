@@ -1,6 +1,50 @@
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Build Output
 dist
-.DS_Store
+dist-ssr
+build
+out
+
+# Testing
+coverage
+
+# Development
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Server
 server/public
-vite.config.ts.*
+pdfs/
+uploads/
+
+# OS specific
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
 *.tar.gz
+*.zip
+unused/
+backup/
+tmp/

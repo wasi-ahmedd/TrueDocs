@@ -44,7 +44,7 @@ export default function PeopleList() {
     <div className="min-h-screen bg-background p-4 md:p-8 max-w-7xl mx-auto">
       <header className="flex items-center justify-between mb-8 md:mb-12">
         <div className="flex items-center gap-4">
-          <Link href="/">
+          <Link href="/home">
             <Button variant="ghost" size="icon" className="rounded-full hover:bg-secondary">
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -67,7 +67,7 @@ export default function PeopleList() {
           <CreatePersonDialog />
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           variants={container}
           initial="hidden"
           animate="show"
@@ -77,7 +77,7 @@ export default function PeopleList() {
             <motion.div key={person.id} variants={item}>
               <Card className="h-full hover:shadow-lg transition-all duration-300 border border-border/60 hover:border-primary/50 group relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                   <AlertDialog>
+                  <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                         <Trash2 className="h-4 w-4" />
@@ -92,7 +92,7 @@ export default function PeopleList() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                           onClick={() => deletePerson.mutate(person.id)}
                           className="bg-destructive hover:bg-destructive/90"
                         >
@@ -102,7 +102,7 @@ export default function PeopleList() {
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-                
+
                 <Link href={`/people/${person.id}`} className="block h-full">
                   <CardContent className="p-6 h-full flex flex-col">
                     <div className="flex items-start gap-4 mb-4">
@@ -114,7 +114,7 @@ export default function PeopleList() {
                         <p className="text-sm text-muted-foreground">ID: #{person.id.toString().padStart(4, '0')}</p>
                       </div>
                     </div>
-                    
+
                     <div className="mt-auto">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/50 p-3 rounded-lg">
                         <CreditCard className="h-4 w-4" />
@@ -122,7 +122,7 @@ export default function PeopleList() {
                         <span>Cards stored</span>
                       </div>
                     </div>
-                    
+
                     <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
                       <div className="bg-primary/10 p-2 rounded-full">
                         <ChevronRight className="h-4 w-4 text-primary" />

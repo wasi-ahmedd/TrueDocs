@@ -39,7 +39,7 @@ export function useCreatePerson() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      
+
       if (!res.ok) {
         if (res.status === 400) {
           const error = await res.json();
@@ -54,10 +54,41 @@ export function useCreatePerson() {
       toast({ title: "Success", description: "Person added successfully" });
     },
     onError: (error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+}
+
+export function useUpdatePerson() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: InsertPerson }) => {
+      const url = buildUrl(api.people.update.path, { id });
+      const res = await fetch(url, {
+        method: api.people.update.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error("Failed to update person");
+      return api.people.update.responses[200].parse(await res.json());
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [api.people.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.people.get.path, data.id] });
+      toast({ title: "Updated", description: "Person updated successfully" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
       });
     }
   });

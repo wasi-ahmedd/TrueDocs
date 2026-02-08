@@ -1,11 +1,35 @@
 import { Link } from "wouter";
-import { CARD_TYPES } from "@shared/routes";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, CreditCard, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { GlobalAddCardDialog } from "@/components/GlobalAddCardDialog";
+import { getIcon } from "@/lib/icon-map";
+import { AddCardTypeDialog } from "@/components/AddCardTypeDialog";
+import { useToast } from "@/hooks/use-toast";
+
+type CardType = {
+  id: number;
+  slug: string;
+  label: string;
+  description: string;
+  icon: string;
+  color: string;
+};
 
 export default function CardsList() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: cardTypes, isLoading } = useQuery<CardType[]>({
+    queryKey: ['cardTypes'],
+    queryFn: async () => {
+      const res = await fetch('/api/card-types');
+      if (!res.ok) throw new Error('Failed to fetch types');
+      return res.json();
+    }
+  });
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -21,62 +45,63 @@ export default function CardsList() {
     show: { opacity: 1, scale: 1 }
   };
 
-  // Prettier names map
-  const typeNames: Record<string, string> = {
-    aadhaar: "Aadhaar Card",
-    pan: "PAN Card",
-    voterid: "Voter ID",
-    ration: "Ration Card"
-  };
-
-  const typeColors: Record<string, string> = {
-    aadhaar: "text-blue-600 bg-blue-50 border-blue-100",
-    pan: "text-orange-600 bg-orange-50 border-orange-100",
-    voterid: "text-purple-600 bg-purple-50 border-purple-100",
-    ration: "text-green-600 bg-green-50 border-green-100",
-  };
+  if (isLoading) return <div className="p-8">Loading types...</div>;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 max-w-7xl mx-auto">
-      <header className="flex items-center gap-4 mb-12">
-        <Link href="/">
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-secondary">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Card Types</h1>
-          <p className="text-muted-foreground">Select a document type to view records</p>
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-4 mb-8 md:mb-12">
+        <div className="flex items-center gap-4">
+          <Link href="/home">
+            <Button variant="ghost" size="icon" className="rounded-full hover:bg-secondary shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Card Types</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Select a document type</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <AddCardTypeDialog />
+          <GlobalAddCardDialog />
         </div>
       </header>
 
-      <motion.div 
+      <motion.div
         variants={container}
         initial="hidden"
         animate="show"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
       >
-        {CARD_TYPES.map((type) => (
-          <Link key={type} href={`/cards/${type}`} className="block h-full group">
-            <motion.div variants={item} className="h-full">
-              <Card className={`h-full border-2 transition-all duration-300 hover:shadow-lg ${typeColors[type]} hover:border-current hover:-translate-y-1`}>
-                <CardContent className="p-8 flex items-center justify-between h-full">
-                  <div className="flex items-center gap-6">
-                    <div className="h-16 w-16 rounded-2xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <CreditCard className="h-8 w-8 opacity-80" />
+        {cardTypes?.map((type) => {
+          const Icon = getIcon(type.icon);
+
+          return (
+            <Link key={type.slug} href={`/cards/${type.slug}`} className="block h-full group relative">
+              <motion.div variants={item} className="h-full">
+                <Card className={`h-full border-2 transition-all duration-300 hover:shadow-lg ${type.color || 'bg-card'} hover:-translate-y-1`}>
+                  <CardContent className="p-8 flex items-center justify-between h-full relative">
+                    <div className="flex items-center gap-6">
+                      <div className="h-16 w-16 rounded-2xl bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="h-8 w-8 opacity-80" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold tracking-tight">{type.label}</h3>
+                        <p className="opacity-70 font-medium">{type.description || "View all records"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold tracking-tight">{typeNames[type]}</h3>
-                      <p className="opacity-70 font-medium">View all records</p>
+                    <div className="flex items-center gap-4">
+                      <ChevronRight className="h-6 w-6 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                     </div>
-                  </div>
-                  <ChevronRight className="h-6 w-6 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Link>
-        ))}
+
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </Link>
+          );
+        })}
       </motion.div>
+
     </div>
   );
 }

@@ -1,0 +1,5 @@
+reset_password.ts
+check_password.ts
+attached_assets/
+.replit
+

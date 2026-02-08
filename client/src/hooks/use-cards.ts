@@ -21,26 +21,41 @@ export function useCreateCard() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: InsertCard) => {
+    mutationFn: async (data: InsertCard | FormData) => {
+      const isFormData = data instanceof FormData;
+      const headers: Record<string, string> = {};
+      if (!isFormData) {
+        headers["Content-Type"] = "application/json";
+      }
+
       const res = await fetch(api.cards.create.path, {
         method: api.cards.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        headers,
+        body: isFormData ? data : JSON.stringify(data),
       });
-      
-      if (!res.ok) throw new Error("Failed to add card");
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to add card");
+      }
       return api.cards.create.responses[201].parse(await res.json());
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: [api.people.get.path, variables.personId] });
+      let personId: number;
+      if (variables instanceof FormData) {
+        personId = Number(variables.get('personId'));
+      } else {
+        personId = variables.personId;
+      }
+      queryClient.invalidateQueries({ queryKey: [api.people.get.path, personId] });
       queryClient.invalidateQueries({ queryKey: [api.cards.listByType.path] });
       toast({ title: "Success", description: "Card added successfully" });
     },
     onError: (error) => {
-      toast({ 
-        title: "Error", 
-        description: error.message, 
-        variant: "destructive" 
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
       });
     }
   });
